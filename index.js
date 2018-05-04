@@ -34,6 +34,10 @@ app.get('/webs/game.js', function(req, res) {
   mimeSafeSend(path.join(__dirname, '/webs/game.js'), res)
 })
 
+app.get('/webs/controls.js', function(req, res) {
+  mimeSafeSend(path.join(__dirname, '/webs/controls.js'), res)
+})
+
 app.set('views', path.join(__dirname, 'webs'));
 
 app.get('/', (req, res) => {
@@ -48,6 +52,7 @@ let enemys = [];
 io.on('connection', function(socket) {
   console.log('a user connected');
   players[socket.id] = {
+    id: socket.id,
     hp: 10,
     x: 300,
     y: 300,
@@ -84,10 +89,10 @@ io.on('connection', function(socket) {
 });
 
 setInterval(function() {
-  if (enemys.length < 6 && playerIds.length > 0) {
+  if (enemys.length < 20 && playerIds.length > 0) {
     enemys.push({
       hitDes: true,
-      ind: enemys.length,
+      id: enemys.length,
       ai: Math.floor(Math.random() * 3),
       x: Math.random() * 600,
       y: Math.random() * 600,

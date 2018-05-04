@@ -1,76 +1,21 @@
-let socket = io();
-let movement = {
-  up: false,
-  down: false,
-  left: false,
-  right: false
-}
-
-document.addEventListener('keydown', function(event) {
-  switch (event.keyCode) {
-    case 65:
-      movement.left = true;
-      break;
-    case 87:
-      movement.up = true;
-      break;
-    case 68:
-      movement.right = true;
-      break;
-    case 83:
-      movement.down = true;
-      break;
-  }
-});
-document.addEventListener('keyup', function(event) {
-  switch (event.keyCode) {
-    case 65:
-      movement.left = false;
-      break;
-    case 87:
-      movement.up = false;
-      break;
-    case 68:
-      movement.right = false;
-      break;
-    case 83:
-      movement.down = false;
-      break;
-  }
-});
-
-socket.emit('new player!')
-
-setInterval(function() {
-  socket.emit('movement', movement);
-}, 1000 / 60)
-
 let canvas = document.getElementById('canvas');
 canvas.width = 800;
 canvas.height = 600;
 let context = canvas.getContext('2d');
-socket.on('playerState', function(players) {
-  context.clearRect(0, 0, 800, 600);
-  for (let id in players) {
-    let player = players[id];
-    context.fillStyle = player.color;
-    context.beginPath();
-    context.arc(player.x, player.y, 10, 0, 2 * Math.PI);
-    context.fill();
-    context.fillText(player.name, player.x, player.y + 15)
+
+let players = {};
+let enemys = [];
+
+
+socket.on('playerState', function(playersrec) {
+  for (let id in playersrec) {
+    let player = playersrec[id];
+    players[id] = player;
   }
 });
 
-socket.on('enemyState', function(enemys) {
-  let bleh = 0;
-  for (let id in enemys) {
-    let enemy = enemys[bleh];
-    bleh++;
-    context.fillStyle = enemy.color;
-    context.beginPath();
-    context.arc(enemy.x, enemy.y, 10, 0, 2 * Math.PI);
-    context.fill();
-  }
+socket.on('enemyState', function(enemysrec) {
+  enemys = enemysrec;
 });
 
 let submitButton = document.getElementById('submit')
@@ -87,3 +32,24 @@ inputBox.addEventListener('keyup', function(event) {
     socket.emit('setName', inputBox.value);
   }
 })
+
+setInterval(function() {
+  context.clearRect(0, 0, 800, 600);
+  for (let id in players) {
+    let player = players[id];
+    context.fillStyle = player.color;
+    context.beginPath();
+    context.arc(player.x, player.y, 10, 0, 2 * Math.PI);
+    context.fill();
+    context.fillText(player.name, player.x, player.y + 15)
+  }
+  let bleh = 0;
+  while (bleh < enemys.length) {
+    let enemy = enemys[bleh];
+    bleh++;
+    context.fillStyle = enemy.color;
+    context.beginPath();
+    context.arc(enemy.x, enemy.y, 10, 0, 2 * Math.PI);
+    context.fill();
+  }
+}, 1000 / 60)
