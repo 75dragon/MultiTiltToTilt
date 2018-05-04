@@ -42,15 +42,19 @@ app.get('/', (req, res) => {
 
 let server = app.listen(PORT, () => console.log(`Example app listening on port ${PORT}`))
 let io = SocketIO.listen(server);
+let playerIds = [];
 let players = {};
 let enemys = [];
 io.on('connection', function(socket) {
   console.log('a user connected');
   players[socket.id] = {
+    hp: 10,
     x: 300,
     y: 300,
-    name: 'NoName'
+    name: 'NoName',
+    color: 'rgb(0,0,0)'
   };
+  playerIds.push(socket.id)
   socket.on('movement', function(data) {
     var player = players[socket.id] || {};
     if (data.left) {
@@ -71,6 +75,7 @@ io.on('connection', function(socket) {
   })
   socket.on('disconnect', function() {
     delete players[socket.id];
+    playerIds.splice(playerIds.indexOf(socket.id), 1);
   })
   setInterval(function() {
     io.emit('playerState', players)
@@ -79,13 +84,15 @@ io.on('connection', function(socket) {
 });
 
 setInterval(function() {
-  if (enemys.length < 20) {
+  if (enemys.length < 6 && playerIds.length > 0) {
     enemys.push({
+      hitDes: true,
       ind: enemys.length,
-      ai: Math.floor(Math.random() * 5),
+      ai: Math.floor(Math.random() * 3),
       x: Math.random() * 600,
       y: Math.random() * 600,
-      color: "rgb(0,0,0)"
+      color: "rgb(" + Math.floor(Math.random() * 200) + "," + Math.floor(Math.random() * 200) + "," + Math.floor(Math.random() * 200) + ")",
+      spd: 3
     })
   }
 }, 2000);
@@ -93,17 +100,49 @@ setInterval(function() {
 function updateEnemies() {
   for (let i = 0; i < enemys.length; i++) {
 
-    if(enemys[i].ai == 0)
-    {
-    enemys[i].x = enemys[i].x + Math.random() * 10 - 5;
-    enemys[i].y = enemys[i].y + Math.random() * 10 - 5;
-  }
-  else if (enemys[i].ai == 1){
+    if (enemys[i].ai == 0) {
+      enemys[i].x = enemys[i].x + Math.random() * 10 - 5;
+      enemys[i].y = enemys[i].y + Math.random() * 10 - 5;
+    } else if (enemys[i].ai == 1) {
+      if(playerIds.length > 0)
+      {
+      if (!('stalk' in enemys[i]) || playerIds.indexOf(enemys[i].stalk) == -1) {
+        enemys[i].stalk = playerIds[Math.floor(Math.random() * playerIds.length)]
+      }
+      let tx = players[enemys[i].stalk].x - enemys[i].x,
+        ty = players[enemys[i].stalk].y - enemys[i].y
+      dist = Math.sqrt(tx * tx + ty * ty);
 
-  }
-  }
-}
+      if (dist > 10) {
+        enemys[i].y = enemys[i].y + enemys[i].spd * ty / dist;
+        enemys[i].x = enemys[i].x + enemys[i].spd * tx / dist;
+      }}
 
-setInterval(function() {
-  updateEnemies();
-}, 1000 / 30);
+    } else if (enemys[i].ai == 2) {
+      if (enemys[i].hitDes) {
+        enemys[i].tx = Math.floor(Math.random() * 600)
+        enemys[i].ty = Math.floor(Math.random() * 600)
+        enemys[i].hitDes = false;
+      }
+      let tx = enemys[i].tx - enemys[i].x,
+        ty = enemys[i].ty - enemys[i].y
+      dist = Math.sqrt(tx * tx + ty * ty);
+
+      if (dist > 10) {
+        enemys[i].y = enemys[i].y + enemys[i].spd * ty / dist;
+        enemys[i].x = enemys[i].x + enemys[i].spd * tx / dist;
+      } else {
+        enemys[i].hitDes = true;
+      }
+    }
+    for (let j = 0; j < playerIds.length; j++) {
+      if (10 > Math.sqrt((players[playerIds[j]].x - enemys[i].x) * (players[playerIds[j]].x - enemys[i].x) + (players[playerIds[j]].y - enemys[i].y) * (players[playerIds[j]].y - enemys[i].y))) {
+        players[playerIds[j]].color = "rgb(100,100,100)";
+        }
+      }
+    }
+  }
+
+  setInterval(function() {
+    updateEnemies();
+  }, 1000 / 30);

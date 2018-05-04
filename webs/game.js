@@ -51,9 +51,9 @@ canvas.height = 600;
 let context = canvas.getContext('2d');
 socket.on('playerState', function(players) {
   context.clearRect(0, 0, 800, 600);
-  context.fillStyle = 'black';
   for (let id in players) {
     let player = players[id];
+    context.fillStyle = player.color;
     context.beginPath();
     context.arc(player.x, player.y, 10, 0, 2 * Math.PI);
     context.fill();
@@ -62,12 +62,11 @@ socket.on('playerState', function(players) {
 });
 
 socket.on('enemyState', function(enemys) {
-  context.fillStyle = 'black';
   let bleh = 0;
   for (let id in enemys) {
     let enemy = enemys[bleh];
-    console.log(bleh);
     bleh++;
+    context.fillStyle = enemy.color;
     context.beginPath();
     context.arc(enemy.x, enemy.y, 10, 0, 2 * Math.PI);
     context.fill();
