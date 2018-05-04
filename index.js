@@ -49,6 +49,7 @@ let io = SocketIO.listen(server);
 let playerIds = [];
 let players = {};
 let enemys = [];
+
 io.on('connection', function(socket) {
   console.log('a user connected');
   players[socket.id] = {
@@ -64,15 +65,31 @@ io.on('connection', function(socket) {
     var player = players[socket.id] || {};
     if (data.left) {
       player.x -= 5;
+      if (player.x < 0)
+      {
+        player.x = 0;
+      }
     }
     if (data.up) {
       player.y -= 5;
+      if (player.y < 0)
+      {
+        player.y = 0;
+      }
     }
     if (data.right) {
       player.x += 5;
+      if (player.x > 800)
+      {
+        player.x = 800;
+      }
     }
     if (data.down) {
       player.y += 5;
+      if (player.y > 600)
+      {
+        player.y = 600;
+      }
     }
   })
   socket.on('setName', function(data) {
@@ -142,7 +159,7 @@ function updateEnemies() {
     }
     for (let j = 0; j < playerIds.length; j++) {
       if (10 > Math.sqrt((players[playerIds[j]].x - enemys[i].x) * (players[playerIds[j]].x - enemys[i].x) + (players[playerIds[j]].y - enemys[i].y) * (players[playerIds[j]].y - enemys[i].y))) {
-        players[playerIds[j]].color = "rgb(100,100,100)";
+        players[playerIds[j]].color = "rgb(200,25,25)";
         }
       }
     }

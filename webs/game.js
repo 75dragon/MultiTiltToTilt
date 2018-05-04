@@ -35,6 +35,8 @@ inputBox.addEventListener('keyup', function(event) {
 
 setInterval(function() {
   context.clearRect(0, 0, 800, 600);
+  context.fillStyle = 'black';
+  context.strokeRect(0,0,800,600);
   for (let id in players) {
     let player = players[id];
     context.fillStyle = player.color;
