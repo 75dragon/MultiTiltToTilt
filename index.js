@@ -196,11 +196,14 @@ function updateEnemies()
     {
       if (10 > Math.sqrt((players[playerIds[j]].x - enemys[i].x) * (players[playerIds[j]].x - enemys[i].x) + (players[playerIds[j]].y - enemys[i].y) * (players[playerIds[j]].y - enemys[i].y)))
       {
+        if(players[playerIds[j]].color != "rgb(200,25,25)")
+        {
         players[playerIds[j]].color = "rgb(200,25,25)";
         dead.push({x: players[playerIds[j]].x,
                   y: players[playerIds[j]].y,
                 }
-                )
+          )
+        }
       }
     }
   }
