@@ -138,6 +138,10 @@ setInterval(function()
       spd: 3
     })
   }
+  if ( playerIds.length == 0 )
+  {
+    enemys = [];
+  }
 }, 2000);
 
 function updateEnemies()
